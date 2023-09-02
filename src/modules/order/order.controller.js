@@ -137,7 +137,7 @@ export const createOrder = asyncHandler(async (req, res, next) => {
       payment_method_types: ["card"],
       mode: "payment",
       metadata: {
-        order_id: order._id,
+        order_id: order._id.toString(),
       },
       success_url: process.env.SUCCESS_URL,
       cancel_url: process.env.CANCEL_URL,
@@ -206,13 +206,16 @@ export const webhook = asyncHandler(async (request, response) => {
   if (event.type === "checkout.session.completed") {
     // clear cart
     // update stock
-    await Order.findByIdAndUpdate(orderId, { status: "payed" });
+    await Order.findOneAndUpdate({ _id: orderId }, { status: "payed" });
     return;
   }
 
-  await Order.findByIdAndUpdate(orderId, {
-    status: "failed to pay",
-  });
+  await Order.findOneAndUpdate(
+    { _id: orderId },
+    {
+      status: "failed to pay",
+    }
+  );
 
   return;
 });
